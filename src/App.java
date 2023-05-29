@@ -15,17 +15,19 @@ public class App {
 			scanner = new Scanner(file);
 
 			// Read colored nodes
-			if (!scanner.hasNextLine()) throw new Error("No nodes informed");
+			if (!scanner.hasNextLine())
+				throw new Error("No nodes informed");
 
 			String[] nodes = scanner.nextLine().split(" ");
 			int[] coloredNodes = new int[nodes.length];
 			for (int i = 0; i < nodes.length; i++)
 				coloredNodes[i] = Integer.parseInt(nodes[i]);
-			
+
 			int nColors = App.colorsLength(coloredNodes);
 
 			// Read weighted edges
-			if (!scanner.hasNextLine()) throw new Error("No edges informed");
+			if (!scanner.hasNextLine())
+				throw new Error("No edges informed");
 
 			String[] edges = scanner.nextLine().split(";");
 
@@ -33,18 +35,20 @@ public class App {
 			for (int i = 0; i < edgesMatrix.length; i++)
 				for (int j = 0; j < edgesMatrix[i].length; j++)
 					edgesMatrix[i][j] = -1;
-			
+
 			Pattern regex = Pattern.compile("^\\((\\d+),(\\d+),(\\d+)\\)$");
 			for (int i = 0; i < edges.length; i++) {
 				Matcher m = regex.matcher(edges[i]);
-				if (!m.matches()) throw new Error("Arestas não seguem o padrão (nó1,nó2,peso);...;(nó1,nó2,peso)");
+				if (!m.matches())
+					throw new Error("Arestas não seguem o padrão (nó1,nó2,peso);...;(nó1,nó2,peso)");
 
 				edgesMatrix[Integer.parseInt(m.group(1))][Integer.parseInt(m.group(2))] = Integer.parseInt(m.group(3));
 				edgesMatrix[Integer.parseInt(m.group(2))][Integer.parseInt(m.group(1))] = Integer.parseInt(m.group(3));
 			}
 
 			// Read s and t
-			if (!scanner.hasNextLine()) throw new Error("No s t vertices informed");
+			if (!scanner.hasNextLine())
+				throw new Error("No s t vertices informed");
 
 			String[] st = scanner.nextLine().split(" ");
 
@@ -54,14 +58,15 @@ public class App {
 			System.out.println("An error occured.");
 			e.printStackTrace();
 		} finally {
-			if (scanner != null) scanner.close();
+			if (scanner != null)
+				scanner.close();
 		}
 	}
 
 	public static int colorsLength(int[] coloredNodes) {
 		Set<Integer> colors = new HashSet<Integer>();
 
-		for (int color: coloredNodes)
+		for (int color : coloredNodes)
 			colors.add(color);
 
 		return colors.size();
