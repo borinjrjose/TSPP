@@ -54,6 +54,8 @@ public class App {
 
 			int s = Integer.parseInt(st[0]);
 			int t = Integer.parseInt(st[1]);
+
+			TSPP tspp = new TSPP(coloredNodes, edgesMatrix, nColors, s, t);
 		} catch (FileNotFoundException e) {
 			System.out.println("An error occured.");
 			e.printStackTrace();

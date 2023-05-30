@@ -8,7 +8,7 @@ public class TSPP {
   private final GRBVar[] nodes;
   private final GRBVar[][] edges;
 
-  TSPP(int[] coloredNodes, int[][] weightedEdges, int numberColors) throws GRBException {
+  TSPP(int[] coloredNodes, int[][] weightedEdges, int numberColors, int s, int t) throws GRBException {
     this.coloredNodes = coloredNodes;
 
     this.env = new GRBEnv(true);
@@ -48,6 +48,42 @@ public class TSPP {
           colorConstraint.addTerm(1, this.nodes[i]);
 
       this.model.addConstr(colorConstraint, GRB.GREATER_EQUAL, 1, "color-" + c);
+    }
+
+    /**
+     * All nodes need to have one edge leaving them with the exception of the t
+     * node
+     */
+    for (int i = 0; i < nodes.length; i++) {
+      GRBLinExpr leavingConstraing = new GRBLinExpr();
+      leavingConstraing.addTerm(1, nodes[i]);
+
+      for (int j = 0; j < edges[i].length; j++)
+        if (edges[i][j] != null)
+          leavingConstraing.addTerm(-1, edges[i][j]);
+
+      if (i != t)
+        this.model.addConstr(leavingConstraing, GRB.EQUAL, 0, "leaving-node-" + i);
+      else
+        this.model.addConstr(leavingConstraing, GRB.EQUAL, 1, "leaving-node-t");
+    }
+
+    /**
+     * All nodes need to have one edge entering them with the exception of the s
+     * node
+     */
+    for (int j = 0; j < nodes.length; j++) {
+      GRBLinExpr enteringConstraint = new GRBLinExpr();
+      enteringConstraint.addTerm(1, nodes[j]);
+
+      for (int i = 0; i < edges.length; i++)
+        if (edges[i][j] != null)
+          enteringConstraint.addTerm(-1, edges[i][j]);
+
+      if (j != s)
+        this.model.addConstr(enteringConstraint, GRB.EQUAL, 0, "entering-node-" + j);
+      else
+        this.model.addConstr(enteringConstraint, GRB.EQUAL, 1, "entering-node-s");
     }
   }
 }
