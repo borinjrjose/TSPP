@@ -85,5 +85,19 @@ public class TSPP {
       else
         this.model.addConstr(enteringConstraint, GRB.EQUAL, 1, "entering-node-s");
     }
+
+    this.model.optimize();
+  }
+
+  public void reportResults() throws GRBException {
+    for (int i = 0; i < this.nodes.length; i++)
+      System.out.println(nodes[i].get(GRB.StringAttr.VarName) + " " + nodes[i].get(GRB.DoubleAttr.X));
+
+    for (int i = 0; i < this.edges.length; i++)
+      for (int j = 0; j < this.edges[i].length; j++)
+        if (edges[i][j] != null)
+          System.out.println(edges[i][j].get(GRB.StringAttr.VarName) + " " + edges[i][j].get(GRB.DoubleAttr.X));
+    
+    System.out.println("Obj: " + this.model.get(GRB.DoubleAttr.ObjVal));
   }
 }
