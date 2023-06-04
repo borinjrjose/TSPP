@@ -8,6 +8,8 @@ public class TSPP {
   private final GRBVar[] nodes;
   private final GRBVar[][] edges;
 
+  private final GRBVar[] labels;
+
   TSPP(int[] coloredNodes, int[][] weightedEdges, int numberColors, int s, int t) throws GRBException {
     this.coloredNodes = coloredNodes;
 
@@ -86,6 +88,28 @@ public class TSPP {
         this.model.addConstr(enteringConstraint, GRB.EQUAL, 1, "entering-node-s");
     }
 
+    // Labels for cicle prevention
+    this.labels = new GRBVar[this.nodes.length];
+    for (int i = 0; i < this.labels.length; i++)
+      this.labels[i] = this.model.addVar(0, GRB.INFINITY, 0, GRB.INTEGER, "label[" + i + "]");
+
+    int N = 1000000;
+
+    for (int i = 0; i < this.edges.length; i++)
+      for (int j = 0; j < this.edges[i].length; j++)
+        if (this.edges[i][j] != null) {
+          GRBLinExpr labelConstraint = new GRBLinExpr();
+
+          // label[j] - label[i] >= edges[i][j] - (1 - edges[i][j])*N
+          labelConstraint.addTerm(1, this.labels[j]);
+          labelConstraint.addTerm(-1, labels[i]);
+
+          labelConstraint.addTerm(-1, edges[i][j]);
+          labelConstraint.addTerm(-N, edges[i][j]);
+
+          this.model.addConstr(labelConstraint, GRB.GREATER_EQUAL, -N, "edge[" + i + "][" + j + "]-label");
+        }
+
     this.model.optimize();
   }
 
@@ -93,11 +117,20 @@ public class TSPP {
     for (int i = 0; i < this.nodes.length; i++)
       System.out.println(nodes[i].get(GRB.StringAttr.VarName) + " " + nodes[i].get(GRB.DoubleAttr.X));
 
+    System.out.println();
+
     for (int i = 0; i < this.edges.length; i++)
       for (int j = 0; j < this.edges[i].length; j++)
         if (edges[i][j] != null)
           System.out.println(edges[i][j].get(GRB.StringAttr.VarName) + " " + edges[i][j].get(GRB.DoubleAttr.X));
-    
+
+    System.out.println();
+
+    for (int i = 0; i < this.labels.length; i++)
+      System.out.println(this.labels[i].get(GRB.StringAttr.VarName) + " " + this.labels[i].get(GRB.DoubleAttr.X));
+
+    System.out.println();
+
     System.out.println("Obj: " + this.model.get(GRB.DoubleAttr.ObjVal));
   }
 }
