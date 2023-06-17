@@ -1,3 +1,5 @@
+import gurobi.GRB;
+
 public class TSPPDual {
   // Variables
   int initialEdgesPosition;
@@ -12,6 +14,11 @@ public class TSPPDual {
 
   // Constraint matrix
   private final int[][] A;
+  private final char[] relations;
+  private final int[] b;
+
+  // Objective matrix
+  private final int[] c;
 
   TSPPDual(int[] coloredNodes, int[][] weightedEdges, int numberColors, int s, int t) {
     // Numbered edges
@@ -21,7 +28,7 @@ public class TSPPDual {
       for (int j = 0; j < weightedEdges[i].length; j++)
         numberedEdges[i][j] = weightedEdges[i][j] > 0 ? ++edgeNumber : -1;
 
-    // Normal problem variables
+    // Primal problem variables
     this.initialEdgesPosition = 0;
     this.initialNodesPosition = 0;
     for (int i = 0; i < weightedEdges.length; i++)
@@ -31,7 +38,7 @@ public class TSPPDual {
 
     this.initialLabelPosition = this.initialNodesPosition + coloredNodes.length;
 
-    // Normal Problem constraints
+    // Primal Problem constraints
     this.initialColorPosition = 0;
     this.initialLeavingEdgePosition = this.initialColorPosition + numberColors;
     this.initialEnteringEdgePosition = this.initialLeavingEdgePosition + coloredNodes.length;
@@ -80,10 +87,34 @@ public class TSPPDual {
       }
     }
 
-    for (int i = 0; i < this.A.length; i++) {
-      System.out.println();
-      for (int j = 0; j < this.A[i].length; j++)
-        System.out.print(this.A[i][j] + " ");
+    // b and relation matrices
+    this.b = new int[this.A.length];
+    this.relations = new char[this.A.length];
+    for (int i = this.initialColorPosition; i < this.initialLeavingEdgePosition; i++) {
+      this.relations[i] = GRB.GREATER_EQUAL;
+      b[i] = 1;
     }
+
+    for (int i = this.initialLeavingEdgePosition; i < this.initialEnteringEdgePosition; i++) {
+      this.relations[i] = GRB.EQUAL;
+      b[i] = (i - this.initialLeavingEdgePosition) != t ? 0 : 1;
+    }
+
+    for (int i = this.initialEnteringEdgePosition; i < this.initialCiclePrevetionPosition; i++) {
+      this.relations[i] = GRB.EQUAL;
+      b[i] = (i - this.initialEnteringEdgePosition) != s ? 0 : 1;
+    }
+
+    for (int i = this.initialCiclePrevetionPosition; i < this.b.length; i++) {
+      this.relations[i] = GRB.GREATER_EQUAL;
+      b[i] = -N;
+    }
+
+    // Objective matrix
+    this.c = new int[this.A[0].length];
+    for (int i = 0; i < weightedEdges.length; i++)
+      for (int j = 0; j < weightedEdges[i].length; j++)
+        if (weightedEdges[i][j] > 0)
+          this.c[numberedEdges[i][j]] = weightedEdges[i][j];
   }
 }
