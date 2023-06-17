@@ -1,6 +1,11 @@
 import gurobi.GRB;
+import gurobi.GRBEnv;
+import gurobi.GRBException;
+import gurobi.GRBLinExpr;
+import gurobi.GRBModel;
+import gurobi.GRBVar;
 
-public class TSPPDual {
+public class TSPPDual implements ITSPP {
   // Variables
   int initialEdgesPosition;
   int initialNodesPosition;
@@ -20,7 +25,12 @@ public class TSPPDual {
   // Objective matrix
   private final int[] c;
 
-  TSPPDual(int[] coloredNodes, int[][] weightedEdges, int numberColors, int s, int t) {
+  // Dual problem model
+  private final GRBEnv env;
+  private final GRBModel model;
+  private final GRBVar[] p;
+
+  TSPPDual(int[] coloredNodes, int[][] weightedEdges, int numberColors, int s, int t) throws GRBException {
     // Numbered edges
     int edgeNumber = -1;
     int[][] numberedEdges = new int[weightedEdges.length][weightedEdges[0].length];
@@ -116,5 +126,67 @@ public class TSPPDual {
       for (int j = 0; j < weightedEdges[i].length; j++)
         if (weightedEdges[i][j] > 0)
           this.c[numberedEdges[i][j]] = weightedEdges[i][j];
+
+    // Creating dual model
+    this.env = new GRBEnv(true);
+    this.env.set("logFile", "TSPPDual.log");
+    this.env.start();
+
+    this.model = new GRBModel(env);
+
+    // Dual variables
+    this.p = new GRBVar[this.A.length];
+
+    // If the primal constraint is equal, p is free. If it's greater equal, then p
+    // is greater equal.
+    for (int i = 0; i < this.A.length; i++) {
+      if (i >= this.initialLeavingEdgePosition && i < this.initialCiclePrevetionPosition)
+        this.p[i] = this.model.addVar(-GRB.INFINITY, GRB.INFINITY, 0, GRB.INTEGER, "p[" + i + " ]");
+      else
+        this.p[i] = this.model.addVar(0, GRB.INFINITY, 0, GRB.INTEGER, "p[" + i + "]");
+    }
+
+    // Objective function
+    GRBLinExpr objective = new GRBLinExpr();
+    for (int i = 0; i < this.p.length; i++)
+      objective.addTerm(this.b[i], this.p[i]);
+
+    this.model.setObjective(objective, GRB.MAXIMIZE);
+
+    // Constraints
+    for (int j = 0; j < this.A[0].length; j++) {
+      GRBLinExpr constraint = new GRBLinExpr();
+
+      for (int i = 0; i < this.A.length; i++)
+        constraint.addTerm(this.A[i][j], this.p[i]);
+
+      this.model.addConstr(constraint, GRB.LESS_EQUAL, this.c[j], "constraint[" + j + "]");
+    }
+
+    this.model.optimize();
+  }
+
+  public void reportResults() throws GRBException {
+    // Printing primal matrices
+    for (int i = 0; i < this.c.length; i++)
+      System.out.print(this.c[i] + " ");
+
+    System.out.println();
+
+    for (int i = 0; i < this.A.length; i++) {
+      System.out.println();
+      for (int j = 0; j < this.A[i].length; j++)
+        System.out.print(this.A[i][j] + " ");
+
+      System.out.print(this.relations[i] + " " + this.b[i]);
+    }
+
+    // Printing results
+    for (int i = 0; i < this.p.length; i++)
+      System.out.println(p[i].get(GRB.StringAttr.VarName) + " " + p[i].get(GRB.DoubleAttr.X));
+
+    System.out.println();
+
+    System.out.println("Obj: " + this.model.get(GRB.DoubleAttr.ObjVal));
   }
 }

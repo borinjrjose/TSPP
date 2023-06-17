@@ -55,7 +55,8 @@ public class App {
 			int s = Integer.parseInt(st[0]);
 			int t = Integer.parseInt(st[1]);
 
-			TSPP tspp = new TSPP(coloredNodes, edgesMatrix, nColors, s, t);
+			ITSPP tspp = args[1].equals("primal") ? new TSPP(coloredNodes, edgesMatrix, nColors, s, t)
+					: new TSPPDual(coloredNodes, edgesMatrix, nColors, s, t);
 			tspp.reportResults();
 		} catch (FileNotFoundException e) {
 			System.out.println("An error occured.");

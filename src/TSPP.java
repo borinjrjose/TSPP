@@ -1,6 +1,6 @@
 import gurobi.*;
 
-public class TSPP {
+public class TSPP implements ITSPP {
   private final int[] coloredNodes;
 
   private final GRBEnv env;
