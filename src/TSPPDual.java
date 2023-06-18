@@ -166,20 +166,39 @@ public class TSPPDual implements ITSPP {
     this.model.optimize();
   }
 
+  private String getAnsiCode(int variable) {
+    String ANSI_RED = "\u001B[31m";
+    String ANSI_BLUE = "\u001B[34m";
+    String ANSI_YELLOW = "\033[0;33m";
+
+    return variable < this.initialNodesPosition ? ANSI_RED
+        : variable < this.initialLabelPosition ? ANSI_BLUE : ANSI_YELLOW;
+  }
+
+  private String getRelationAnsiCode() {
+    return "\033[0;35m";
+  }
+
+  private String getAnsiResetCode() {
+    return "\u001B[0m";
+  }
+
   public void reportResults() throws GRBException {
     // Printing primal matrices
     for (int i = 0; i < this.c.length; i++)
-      System.out.print(this.c[i] + " ");
+      System.out.print(this.getAnsiCode(i) + this.c[i] + this.getAnsiResetCode() + " ");
 
     System.out.println();
 
     for (int i = 0; i < this.A.length; i++) {
       System.out.println();
       for (int j = 0; j < this.A[i].length; j++)
-        System.out.print(this.A[i][j] + " ");
+        System.out.print(this.getAnsiCode(j) + this.A[i][j] + this.getAnsiResetCode() + " ");
 
-      System.out.print(this.relations[i] + " " + this.b[i]);
+      System.out.print(this.getRelationAnsiCode() + this.relations[i] + " " + this.b[i] + this.getAnsiResetCode());
     }
+
+    System.out.println("\n");
 
     // Printing results
     for (int i = 0; i < this.p.length; i++)
