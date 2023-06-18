@@ -10,7 +10,7 @@ public class TSPP implements ITSPP {
 
   private final GRBVar[] labels;
 
-  TSPP(int[] coloredNodes, int[][] weightedEdges, int numberColors, int s, int t) throws GRBException {
+  TSPP(int[] coloredNodes, int[][] weightedEdges, int numberColors, int s, int t, boolean integer) throws GRBException {
     this.coloredNodes = coloredNodes;
 
     this.env = new GRBEnv(true);
@@ -25,12 +25,13 @@ public class TSPP implements ITSPP {
     for (int i = 0; i < this.edges.length; i++)
       for (int j = 0; j < this.edges[i].length; j++)
         if (weightedEdges[i][j] > 0)
-          this.edges[i][j] = this.model.addVar(0, 1, 0, GRB.BINARY, "edge[" + i + "," + j + "]");
+          this.edges[i][j] = this.model.addVar(0, 1, 0, integer ? GRB.BINARY : GRB.CONTINUOUS,
+              "edge[" + i + "," + j + "]");
 
     // Create nodes variables
     this.nodes = new GRBVar[this.coloredNodes.length];
     for (int i = 0; i < this.nodes.length; i++)
-      this.nodes[i] = this.model.addVar(0, 1, 0, GRB.BINARY, "node[" + i + "]");
+      this.nodes[i] = this.model.addVar(0, 1, 0, integer ? GRB.BINARY : GRB.CONTINUOUS, "node[" + i + "]");
 
     // Add objective function
     GRBLinExpr objective = new GRBLinExpr();
@@ -91,7 +92,8 @@ public class TSPP implements ITSPP {
     // Labels for cicle prevention
     this.labels = new GRBVar[this.nodes.length];
     for (int i = 0; i < this.labels.length; i++)
-      this.labels[i] = this.model.addVar(0, GRB.INFINITY, 0, GRB.INTEGER, "label[" + i + "]");
+      this.labels[i] = this.model.addVar(0, GRB.INFINITY, 0, integer ? GRB.INTEGER : GRB.CONTINUOUS,
+          "label[" + i + "]");
 
     int N = 1000000;
 

@@ -30,7 +30,8 @@ public class TSPPDual implements ITSPP {
   private final GRBModel model;
   private final GRBVar[] p;
 
-  TSPPDual(int[] coloredNodes, int[][] weightedEdges, int numberColors, int s, int t) throws GRBException {
+  TSPPDual(int[] coloredNodes, int[][] weightedEdges, int numberColors, int s, int t, boolean integer)
+      throws GRBException {
     // Numbered edges
     int edgeNumber = -1;
     int[][] numberedEdges = new int[weightedEdges.length][weightedEdges[0].length];
@@ -141,9 +142,10 @@ public class TSPPDual implements ITSPP {
     // is greater equal.
     for (int i = 0; i < this.A.length; i++) {
       if (i >= this.initialLeavingEdgePosition && i < this.initialCiclePrevetionPosition)
-        this.p[i] = this.model.addVar(-GRB.INFINITY, GRB.INFINITY, 0, GRB.INTEGER, "p[" + i + " ]");
+        this.p[i] = this.model.addVar(-GRB.INFINITY, GRB.INFINITY, 0, integer ? GRB.INTEGER : GRB.CONTINUOUS,
+            "p[" + i + " ]");
       else
-        this.p[i] = this.model.addVar(0, GRB.INFINITY, 0, GRB.INTEGER, "p[" + i + "]");
+        this.p[i] = this.model.addVar(0, GRB.INFINITY, 0, integer ? GRB.INTEGER : GRB.CONTINUOUS, "p[" + i + "]");
     }
 
     // Objective function
