@@ -14,7 +14,7 @@ public class TSPP implements ITSPP {
     this.coloredNodes = coloredNodes;
 
     this.env = new GRBEnv(true);
-    this.env.set("logFile", "TSPP.log");
+    this.env.set("logFile", "log/TSPP.log");
     this.env.start();
 
     this.model = new GRBModel(env);
@@ -134,5 +134,7 @@ public class TSPP implements ITSPP {
     System.out.println();
 
     System.out.println("Obj: " + this.model.get(GRB.DoubleAttr.ObjVal));
+
+    this.model.write("log/TSPP.lp");
   }
 }

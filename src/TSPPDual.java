@@ -16,6 +16,7 @@ public class TSPPDual implements ITSPP {
   int initialLeavingEdgePosition;
   int initialEnteringEdgePosition;
   int initialCiclePrevetionPosition;
+  int initialBinaryPosition;
 
   // Constraint matrix
   private final int[][] A;
@@ -54,8 +55,9 @@ public class TSPPDual implements ITSPP {
     this.initialLeavingEdgePosition = this.initialColorPosition + numberColors;
     this.initialEnteringEdgePosition = this.initialLeavingEdgePosition + coloredNodes.length;
     this.initialCiclePrevetionPosition = this.initialEnteringEdgePosition + coloredNodes.length;
+    this.initialBinaryPosition = this.initialCiclePrevetionPosition + this.initialNodesPosition;
 
-    this.A = new int[this.initialCiclePrevetionPosition + this.initialNodesPosition][this.initialLabelPosition
+    this.A = new int[this.initialBinaryPosition + this.initialLabelPosition][this.initialLabelPosition
         + coloredNodes.length];
 
     // Color constraints
@@ -84,7 +86,7 @@ public class TSPPDual implements ITSPP {
     }
 
     // Label cicle previnition constraints
-    int N = 1000000;
+    int N = 100;
 
     for (int i = 0; i < weightedEdges.length; i++) {
       for (int j = 0; j < weightedEdges[i].length; j++) {
@@ -96,6 +98,10 @@ public class TSPPDual implements ITSPP {
         this.A[numberedEdges[i][j] + this.initialCiclePrevetionPosition][numberedEdges[i][j]
             + this.initialEdgesPosition] = -N - 1;
       }
+    }
+
+    for (int i = this.initialBinaryPosition; i < this.A.length; i++) {
+      this.A[i][i - this.initialBinaryPosition] = 1;
     }
 
     // b and relation matrices
@@ -116,9 +122,14 @@ public class TSPPDual implements ITSPP {
       b[i] = (i - this.initialEnteringEdgePosition) != s ? 0 : 1;
     }
 
-    for (int i = this.initialCiclePrevetionPosition; i < this.b.length; i++) {
+    for (int i = this.initialCiclePrevetionPosition; i < this.initialBinaryPosition; i++) {
       this.relations[i] = GRB.GREATER_EQUAL;
       b[i] = -N;
+    }
+
+    for (int i = this.initialBinaryPosition; i < this.b.length; i++) {
+      this.relations[i] = GRB.LESS_EQUAL;
+      b[i] = 1;
     }
 
     // Objective matrix
@@ -130,7 +141,7 @@ public class TSPPDual implements ITSPP {
 
     // Creating dual model
     this.env = new GRBEnv(true);
-    this.env.set("logFile", "TSPPDual.log");
+    this.env.set("logFile", "log/TSPPDual.log");
     this.env.start();
 
     this.model = new GRBModel(env);
@@ -139,13 +150,14 @@ public class TSPPDual implements ITSPP {
     this.p = new GRBVar[this.A.length];
 
     // If the primal constraint is equal, p is free. If it's greater equal, then p
-    // is greater equal.
+    // is greater equal. If it's less equal, then p is less equal.
     for (int i = 0; i < this.A.length; i++) {
-      if (i >= this.initialLeavingEdgePosition && i < this.initialCiclePrevetionPosition)
-        this.p[i] = this.model.addVar(-GRB.INFINITY, GRB.INFINITY, 0, integer ? GRB.INTEGER : GRB.CONTINUOUS,
-            "p[" + i + " ]");
-      else
+      if (this.relations[i] == GRB.EQUAL)
+          this.p[i] = this.model.addVar(-GRB.INFINITY, GRB.INFINITY, 0, integer ? GRB.INTEGER : GRB.CONTINUOUS, "p[" + i + "]");
+      else if (this.relations[i] == GRB.GREATER_EQUAL)
         this.p[i] = this.model.addVar(0, GRB.INFINITY, 0, integer ? GRB.INTEGER : GRB.CONTINUOUS, "p[" + i + "]");
+      else
+        this.p[i] = this.model.addVar(-GRB.INFINITY, 0, 0, integer ? GRB.INTEGER : GRB.CONTINUOUS, "p[" + i + "]");
     }
 
     // Objective function
@@ -209,5 +221,7 @@ public class TSPPDual implements ITSPP {
     System.out.println();
 
     System.out.println("Obj: " + this.model.get(GRB.DoubleAttr.ObjVal));
+
+    this.model.write("log/TSPPDual.lp");
   }
 }
