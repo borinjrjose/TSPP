@@ -95,7 +95,7 @@ public class TSPP implements ITSPP {
       this.labels[i] = this.model.addVar(0, GRB.INFINITY, 0, integer ? GRB.INTEGER : GRB.CONTINUOUS,
           "label[" + i + "]");
 
-    int N = 1000000;
+    int N = 98;
 
     for (int i = 0; i < this.edges.length; i++)
       for (int j = 0; j < this.edges[i].length; j++)
