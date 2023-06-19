@@ -200,14 +200,14 @@ public class TSPPDual implements ITSPP {
   public void reportResults() throws GRBException {
     // Printing primal matrices
     for (int i = 0; i < this.c.length; i++)
-      System.out.printf(this.getAnsiCode(i) + "%2d" + this.getAnsiResetCode() + " ", this.c[i]);
+      System.out.printf(this.getAnsiCode(i) + "%3d" + this.getAnsiResetCode() + " ", this.c[i]);
 
     System.out.println();
 
     for (int i = 0; i < this.A.length; i++) {
       System.out.println();
       for (int j = 0; j < this.A[i].length; j++)
-        System.out.printf(this.getAnsiCode(j) + "%2d" + this.getAnsiResetCode() + " ", this.A[i][j]);
+        System.out.printf(this.getAnsiCode(j) + "%3d" + this.getAnsiResetCode() + " ", this.A[i][j]);
 
       System.out.print(this.getRelationAnsiCode() + this.relations[i] + " " + this.b[i] + this.getAnsiResetCode());
     }
