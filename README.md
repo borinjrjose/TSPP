@@ -24,6 +24,9 @@ java -cp ".:<JAR_PATH>:./bin" App <GRAFO> <PRIMAL> <RELAXADO>
 ## Entrada
 Recebe um arquivo `.txt` que representa um grafo colorido. O arquivo de entrada deve seguir o seguinte padrão de 3 linhas:
 
-- primeira linha indica as cores do grafo, representadas de 0 a N, separadas por espaço;
+- primeira linha indica as cores do grafo, representadas de 0 a N, separadas por espaço
 - segunda linha indica as arestas do grafo representadas por triplas separadas por `;` na forma `(i,j,p)`, onde `i` e `j` são os nós da aresta e p é o seu peso
 - terceira linha representa os nós `s` e `t` do grafo separados por espaço
+
+## Exemplos
+Exemplos de arquivos de entrada podem ser encontrados na wiki do projeto [aqui](https://github.com/borinjrjose/TSPP/wiki/Exemplos).
